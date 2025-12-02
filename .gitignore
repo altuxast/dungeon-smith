@@ -1,0 +1,6 @@
+# Ignore raylib external dependency
+external/raylib
+external/raylib*
+
+# Ignore build directory
+build/
