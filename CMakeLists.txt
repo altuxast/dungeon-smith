@@ -22,6 +22,9 @@ add_executable(dungeon-smith ${SOURCES})
 # Link raylib
 target_link_libraries(dungeon-smith raylib)
 
+# Add raylib include directory
+target_include_directories(dungeon-smith PRIVATE external/raylib/src)
+
 # On Windows, also link system libraries
 if (WIN32)
     target_link_libraries(dungeon-smith winmm)
