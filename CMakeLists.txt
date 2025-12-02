@@ -14,7 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_subdirectory(external/raylib)
 
 # Collect all your source files
-file(GLOB SOURCES "src/*.cpp")
+file(GLOB SOURCES "src/*.cpp" "utils/*.cpp")
 
 # Create your executable
 add_executable(dungeon-smith ${SOURCES})
@@ -24,6 +24,9 @@ target_link_libraries(dungeon-smith raylib)
 
 # Add raylib include directory
 target_include_directories(dungeon-smith PRIVATE external/raylib/src)
+
+# Add json include file
+target_include_directories(dungeon-smith PRIVATE external/json)
 
 # On Windows, also link system libraries
 if (WIN32)
