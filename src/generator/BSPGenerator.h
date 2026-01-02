@@ -1,4 +1,5 @@
 #pragma once
+#include "../../utils/Types.h"  // <- include Dungeon definition
 #include "TileMap.h"
 
 class BSPGenerator

@@ -1,16 +1,19 @@
 #include "RaylibRenderer.h"
 #include "raylib.h"
 
-void RaylibRenderer::render(const Dungeon& dungeon, int tileSize){
-    for (int y = 0; y < dungeon.map.size(); y++)
+void RaylibRenderer::render(const Dungeon &dungeon, int tileSize)
+{
+    for (int y = 0; y < dungeon.map.height; y++)
     {
-        for (int x = 0; x < dungeon.map[0].size(); x++)
+        for (int x = 0; x < dungeon.map.width; x++)
         {
-            Color c = dungeon.map[y][x] == Tile::WALL ? DARKGRAY : RAYWHITE;
+            // Color c = dungeon.map[y][x] == Tile::WALL ? DARKGRAY : RAYWHITE;
+
+            Tile t = dungeon.map.get(x, y);
+            Color c = (t == Tile::WALL) ? DARKGRAY : SKYBLUE;
 
             DrawRectangle(x * tileSize, y * tileSize, tileSize, tileSize, c);
+            DrawRectangleLines(x * tileSize, y * tileSize, tileSize, tileSize, DARKGRAY);
         }
-        
     }
-    
 }

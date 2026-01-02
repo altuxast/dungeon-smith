@@ -1,34 +1,34 @@
 cmake_minimum_required(VERSION 3.10)
 
-# Set a default build type if none was specified
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
-endif()
-
 project(dungeon-smith LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Add raylib source (point to the repo root that contains its CMakeLists.txt)
+# Add Raylib
 add_subdirectory(external/raylib)
 
-# Collect all your source files
-file(GLOB SOURCES "src/*.cpp" "utils/*.cpp")
+# Source files
+set(SOURCES
+    src/main.cpp
+    src/generator/BSPGenerator.cpp
+    src/generator/TileMap.cpp
+    src/renderer/RaylibRenderer.cpp
+    utils/JsonIO.cpp
+)
 
-# Create your executable
 add_executable(dungeon-smith ${SOURCES})
 
-# Link raylib
-target_link_libraries(dungeon-smith raylib)
+# Link libraries
+target_link_libraries(dungeon-smith PRIVATE
+    raylib
+    winmm
+)
 
-# Add raylib include directory
-target_include_directories(dungeon-smith PRIVATE external/raylib/src)
-
-# Add json include file
-target_include_directories(dungeon-smith PRIVATE external/json)
-
-# On Windows, also link system libraries
-if (WIN32)
-    target_link_libraries(dungeon-smith winmm)
-endif()
+# Include directories
+target_include_directories(dungeon-smith PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/utils
+    ${CMAKE_SOURCE_DIR}/external/json
+    ${CMAKE_SOURCE_DIR}/external/raylib/src
+)

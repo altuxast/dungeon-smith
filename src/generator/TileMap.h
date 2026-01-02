@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "../utils/Types.h"
+#include "Tile.h"
 
 class TileMap
 {

@@ -1,5 +1,5 @@
 #pragma once
-#include "../utils/Types.h"
+#include "Types.h"
 
 class RaylibRenderer {
     public:
