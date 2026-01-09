@@ -58,6 +58,10 @@ int main()
 
     int frame = 0;
     bool showRooms = false;
+    float animSpeed = 0.01f;
+    bool animate = true;
+    bool skipAnimation = false;
+
     while (!WindowShouldClose())
     {
         frame++;
@@ -68,21 +72,60 @@ int main()
         BeginDrawing();
         ClearBackground(BLACK);
 
+        // Toggle rooms overlay
+        if (IsKeyPressed(KEY_R))
+            showRooms = !showRooms;
+
+        // Animate dungeon generation
+        if (IsKeyPressed(KEY_A))
+            animate = !animate;
+
+        // Animation speed control
+        if (IsKeyPressed(KEY_UP))
+            animSpeed = std::max(0.0f, animSpeed - 0.005f);
+
+        if (IsKeyPressed(KEY_DOWN))
+            animSpeed = std::min(0.25f, animSpeed + 0.005f);
+
         // Handle input
         if (IsKeyPressed(KEY_SPACE))
         {
-            dungeon = generator.generate(80, 60);
-            std::cout << "Dungeon regenerated!" << std::endl;
-            // std::cout.flush();
+            if (animate)
+            {
+                // Animation callback
+                generator.onStep = [&](const Dungeon &d)
+                {
+                    // Skip animation
+                    if (IsKeyPressed(KEY_K))
+                    {
+                        skipAnimation = true;
+                        generator.onStep = nullptr;
+                        return;
+                    }
 
-            // for (int y = 0; y < 10; y++)
-            // {
-            //     for (int x = 0; x < 10; x++)
-            //     {
-            //         std::cout << (dungeon.map.get(x, y) == Tile::FLOOR ? "." : "#");
-            //     }
-            //     std::cout << std::endl;
-            // }
+                    dungeon = d;
+
+                    BeginDrawing();
+                    ClearBackground(BLACK);
+                    renderer.render(dungeon, tileSize, showRooms);
+                    EndDrawing();
+
+                    WaitTime(animSpeed);
+                };
+            }
+            else
+            {
+                generator.onStep = nullptr;
+            }
+
+            dungeon = generator.generate(80, 60);
+
+            skipAnimation = false;
+
+            // Disable callback after generation
+            generator.onStep = nullptr;
+
+            std::cout << "Dungeon regenerated!" << std::endl;
 
             for (int y = 0; y < dungeon.map.height; y++)
             {
@@ -110,16 +153,11 @@ int main()
                 tileSize = std::min(WIDTH / dungeon.map.width, HEIGHT / dungeon.map.height);
                 std::cout << "Dungeon loaded from dungeon.json!" << std::endl;
             }
-            catch(const std::exception& e)
+            catch (const std::exception &e)
             {
-                std::cerr << "Load failed: " << e.what() << std::endl; 
+                std::cerr << "Load failed: " << e.what() << std::endl;
             }
-            
         }
-
-        // Toggle rooms overlay
-        if (IsKeyPressed(KEY_R))
-            showRooms = !showRooms;
 
         // Render dungeon tiles
         renderer.render(dungeon, tileSize, showRooms);
@@ -128,6 +166,9 @@ int main()
         // Draw instructions on the window
         DrawText("Press SPACE to regenerate dungeon", 10, 10, 20, WHITE);
         DrawText("Press S to save dungeon.json", 10, 40, 20, WHITE);
+        DrawText(TextFormat("Speed: %.3f", animSpeed), 10, 130, 20, WHITE);
+        DrawText("Press A to animate dungeon generation", 10, 160, 20, WHITE);
+        DrawText("Press K to skip animation", 10, 190, 20, WHITE);
 
         EndDrawing();
     }

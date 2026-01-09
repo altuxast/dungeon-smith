@@ -21,6 +21,8 @@ public:
         rng.seed(std::random_device{}());
     }
 
+    std::function<void(const Dungeon &)> onStep;
+
     Dungeon generate(int width, int height)
     {
         Dungeon dungeon(width, height);
@@ -94,9 +96,12 @@ private:
                 dungeon.map.set(x, y, Tile::FLOOR);
             }
         }
-
+        
         node->room = {roomX, roomY, roomW, roomH};
         dungeon.rooms.push_back(node->room);
+
+        if (onStep)
+            onStep(dungeon);
     }
 
     void connectNodes(Node *a, Node *b, Dungeon &dungeon)
@@ -119,6 +124,9 @@ private:
             carveHorizontal(ay, by, ax, dungeon);
             carveVertical(ax, bx, by, dungeon);
         }
+
+        if (onStep)
+            onStep(dungeon);
     }
 
     void carveHorizontal(int x1, int x2, int y, Dungeon &dungeon)
@@ -127,7 +135,11 @@ private:
         int start = std::clamp(std::min(x1, x2), 0, dungeon.map.width - 1);
         int end = std::clamp(std::max(x1, x2), 0, dungeon.map.width - 1);
         for (int x = start; x <= end; x++)
+        {
             dungeon.map.set(x, y, Tile::FLOOR);
+            if (onStep)
+                onStep(dungeon);
+        }
     }
 
     void carveVertical(int y1, int y2, int x, Dungeon &dungeon)
@@ -136,13 +148,18 @@ private:
         int start = std::clamp(std::min(y1, y2), 0, dungeon.map.height - 1);
         int end = std::clamp(std::max(y1, y2), 0, dungeon.map.height - 1);
         for (int y = start; y <= end; y++)
+        {
             dungeon.map.set(x, y, Tile::FLOOR);
+            if (onStep)
+                onStep(dungeon);
+        }
     }
 };
 
 Dungeon BSPGenerator::generate(int width, int height)
 {
     BSP bsp;
+    bsp.onStep = onStep;
     return bsp.generate(width, height);
 }
 
