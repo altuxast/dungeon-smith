@@ -1,8 +1,20 @@
 #include <iostream>
 #include "raylib.h"
+
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
+
 #include "generator/BSPGenerator.h"
 #include "renderer/RaylibRenderer.h"
 #include "JsonIO.h"
+
+#undef RAYGUI_IMPLEMENTATION
+
+#define GUI_WINDOW_FILE_DIALOG_IMPLEMENTATION
+#include "gui_window_file_dialog.h"
+
+GuiWindowFileDialogState fileDialog;
+bool showLoadDialog = false;
 
 int main()
 {
@@ -20,6 +32,8 @@ int main()
         std::cerr << "Window failed to initialize!" << std::endl;
         return -1;
     }
+
+    fileDialog = InitGuiWindowFileDialog(NULL);
 
     // Temporary delay to verify window opens
     // std::cout << "Window opened, waiting 2 seconds..." << std::endl;
@@ -63,7 +77,7 @@ int main()
     bool skipAnimation = false;
 
     while (!WindowShouldClose())
-    {
+    {   
         frame++;
         if (frame % 60 == 0)
             std::cout << "Running frame " << frame << std::endl;
@@ -145,22 +159,63 @@ int main()
         }
 
         // Load dungeon
+        // if (IsKeyPressed(KEY_L))
+        // {
+        //     const char *filePath = GuiWindowFileDialog("Load Dungeon", "*.json", "Select a JSON dungeon file");
+
+        //     if (filePath != nullptr && filePath[0] != '\0')
+        //     {
+        //         try
+        //         {
+        //             dungeon = JsonIO::load(filePath);
+        //             tileSize = std::min(WIDTH / dungeon.map.width, HEIGHT / dungeon.map.height);
+        //             std::cout << "Dungeon loaded from: " << filePath << std::endl;
+        //         }
+        //         catch (const std::exception &e)
+        //         {
+        //             std::cerr << "Load failed: " << e.what() << std::endl;
+        //         }
+        //     }
+        // }
+
         if (IsKeyPressed(KEY_L))
         {
-            try
-            {
-                dungeon = JsonIO::load("dungeon.json");
-                tileSize = std::min(WIDTH / dungeon.map.width, HEIGHT / dungeon.map.height);
-                std::cout << "Dungeon loaded from dungeon.json!" << std::endl;
-            }
-            catch (const std::exception &e)
-            {
-                std::cerr << "Load failed: " << e.what() << std::endl;
-            }
+            fileDialog.windowActive = true;
+            showLoadDialog = true;
         }
 
         // Render dungeon tiles
         renderer.render(dungeon, tileSize, showRooms);
+
+        if (showLoadDialog)
+        {
+            GuiWindowFileDialog(&fileDialog);
+
+            // When the dialog file closes
+            if (!fileDialog.windowActive)
+            {
+                showLoadDialog = false;
+
+                if(fileDialog.SelectFilePressed){
+                    std::string fullPath = std::string(fileDialog.dirPathText) + "/" + std::string(fileDialog.fileNameText);
+
+                    try
+                    {
+                        dungeon = JsonIO::load(fullPath.c_str());
+                        tileSize = std::min(WIDTH / dungeon.map.width, HEIGHT / dungeon.map.height);
+                    
+                        std::cout << "Dungeon loaded from: " << fullPath << std::endl;
+                    }
+                    catch(const std::exception& e)
+                    {
+                        std::cerr << "Load failed: " << e.what() << std::endl;
+                    }
+                    
+                }
+            }
+            
+        }
+
         DrawRectangle(50, 50, 100, 100, RED);
 
         // Draw instructions on the window

@@ -4,23 +4,21 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/external/SDL3/include",
-                "${workspaceFolder}/external/SDL3/include/SDL3",
                 "${workspaceFolder}/external/raylib/src",
                 "${workspaceFolder}/external/json",
                 "${workspaceFolder}/src",
+                "${workspaceFolder}/external/raygui",
                 "${workspaceFolder}/utils"
             ],
             "defines": [],
             "compilerPath": "C:/MinGW/bin/g++.exe",
-            "intelliSenseMode": "gcc-x86",
+            "intelliSenseMode": "gcc-x64",
             "browse": {
                 "path": [
-                    "${workspaceFolder}/external/SDL3/include",
-                    "${workspaceFolder}/external/SDL3/include/SDL3",
                     "${workspaceFolder}/external/raylib/src",
                     "${workspaceFolder}/external/json",
                     "${workspaceFolder}/src",
+                    "${workspaceFolder}/external/raygui",
                     "${workspaceFolder}/utils"
                 ],
                 "limitSymbolsToIncludedHeaders": true

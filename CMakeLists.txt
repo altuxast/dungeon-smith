@@ -31,4 +31,5 @@ target_include_directories(dungeon-smith PRIVATE
     ${CMAKE_SOURCE_DIR}/utils
     ${CMAKE_SOURCE_DIR}/external/json
     ${CMAKE_SOURCE_DIR}/external/raylib/src
+    ${CMAKE_SOURCE_DIR}/external/raygui
 )
