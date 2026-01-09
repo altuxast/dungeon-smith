@@ -1,5 +1,6 @@
 #include "JsonIO.h"
 #include <fstream>
+#include <iostream>
 #include "json.hpp"
 
 using json = nlohmann::json;
@@ -8,6 +9,7 @@ void JsonIO::save(const Dungeon &dungeon, const std::string &filename)
 {
     json j;
 
+    j["version"] = 1;
     // j["width"] = dungeon.map[0].size();
     // j["height"] = dungeon.map.size();
 
@@ -52,6 +54,25 @@ Dungeon JsonIO::load(const std::string &filename)
     json j;
     file >> j;
 
+    int version = 0;
+    if (j.contains("version"))
+        version = j["version"].get<int>();
+
+    std::cout << "Loading dungeon version " << version << std::endl;
+
+    switch (version)
+    {
+        case 0:
+            return loadVersion0(j);
+        case 1:
+            return loadVersion1(j);
+        default:
+            throw std::runtime_error("Unsupported dungeon JSON version: " + std::to_string(version));
+    }
+}
+
+Dungeon JsonIO::loadVersion0(const json &j)
+{
     int width = j.at("width").get<int>();
     int height = j.at("height").get<int>();
 
@@ -69,17 +90,22 @@ Dungeon JsonIO::load(const std::string &filename)
 
     if (j.contains("rooms"))
     {
-        for (const auto& r : j["rooms"])
+        for (const auto &r : j["rooms"])
         {
             Room room;
             room.x = r.at("x").get<int>();
             room.y = r.at("y").get<int>();
-            room.width = r.at("height").get<int>();
+            room.width = r.at("width").get<int>();
             room.height = r.at("height").get<int>();
             dungeon.rooms.push_back(room);
         }
     }
-    
 
     return dungeon;
+}
+
+Dungeon JsonIO::loadVersion1(const json &j)
+{
+    // identical to version 0 for now
+    return loadVersion0(j);
 }
