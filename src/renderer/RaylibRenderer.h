@@ -3,5 +3,5 @@
 
 class RaylibRenderer {
     public:
-    void render(const Dungeon& dungeon, int tileSize = 10);
+    void render(const Dungeon& dungeon, int tileSize = 10, bool showRooms = false);
 };

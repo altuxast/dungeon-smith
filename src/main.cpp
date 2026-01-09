@@ -57,6 +57,7 @@ int main()
     std::cout << "Press CTRL+C to quit..." << std::endl;
 
     int frame = 0;
+    bool showRooms = false;
     while (!WindowShouldClose())
     {
         frame++;
@@ -93,14 +94,35 @@ int main()
             }
         }
 
+        // Save dungeon
         if (IsKeyPressed(KEY_S))
         {
             JsonIO::save(dungeon, "dungeon.json");
             std::cout << "Dungeon saved to dungeon.json!" << std::endl;
         }
 
+        // Load dungeon
+        if (IsKeyPressed(KEY_L))
+        {
+            try
+            {
+                dungeon = JsonIO::load("dungeon.json");
+                tileSize = std::min(WIDTH / dungeon.map.width, HEIGHT / dungeon.map.height);
+                std::cout << "Dungeon loaded from dungeon.json!" << std::endl;
+            }
+            catch(const std::exception& e)
+            {
+                std::cerr << "Load failed: " << e.what() << std::endl; 
+            }
+            
+        }
+
+        // Toggle rooms overlay
+        if (IsKeyPressed(KEY_R))
+            showRooms = !showRooms;
+
         // Render dungeon tiles
-        renderer.render(dungeon, tileSize);
+        renderer.render(dungeon, tileSize, showRooms);
         DrawRectangle(50, 50, 100, 100, RED);
 
         // Draw instructions on the window

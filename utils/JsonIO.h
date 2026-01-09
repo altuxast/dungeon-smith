@@ -5,4 +5,5 @@
 class JsonIO {
     public:
     static void save(const Dungeon& dungeon, const std::string& filename);
+    static Dungeon load(const std::string& filename);
 };
