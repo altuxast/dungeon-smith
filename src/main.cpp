@@ -13,8 +13,11 @@
 #define GUI_WINDOW_FILE_DIALOG_IMPLEMENTATION
 #include "gui_window_file_dialog.h"
 
-GuiWindowFileDialogState fileDialog;
+GuiWindowFileDialogState loadDialog;
 bool showLoadDialog = false;
+
+GuiWindowFileDialogState saveDialog;
+bool showSaveDialog = false;
 
 int main()
 {
@@ -33,7 +36,8 @@ int main()
         return -1;
     }
 
-    fileDialog = InitGuiWindowFileDialog(NULL);
+    loadDialog = InitGuiWindowFileDialog(NULL);
+    saveDialog = InitGuiWindowFileDialog(NULL);
 
     // Temporary delay to verify window opens
     // std::cout << "Window opened, waiting 2 seconds..." << std::endl;
@@ -77,7 +81,7 @@ int main()
     bool skipAnimation = false;
 
     while (!WindowShouldClose())
-    {   
+    {
         frame++;
         if (frame % 60 == 0)
             std::cout << "Running frame " << frame << std::endl;
@@ -152,10 +156,15 @@ int main()
         }
 
         // Save dungeon
+        // if (IsKeyPressed(KEY_S))
+        // {
+        //     JsonIO::save(dungeon, "dungeon.json");
+        //     std::cout << "Dungeon saved to dungeon.json!" << std::endl;
+        // }
         if (IsKeyPressed(KEY_S))
         {
-            JsonIO::save(dungeon, "dungeon.json");
-            std::cout << "Dungeon saved to dungeon.json!" << std::endl;
+            saveDialog.windowActive = true;
+            showSaveDialog = true;
         }
 
         // Load dungeon
@@ -180,40 +189,67 @@ int main()
 
         if (IsKeyPressed(KEY_L))
         {
-            fileDialog.windowActive = true;
+            loadDialog.windowActive = true;
             showLoadDialog = true;
         }
 
         // Render dungeon tiles
         renderer.render(dungeon, tileSize, showRooms);
 
+        strcpy(saveDialog.fileNameText, "dungeon.json");
+        if (showSaveDialog)
+        {
+            GuiWindowFileDialog(&saveDialog);
+
+            if (!saveDialog.windowActive)
+            {
+                showSaveDialog = false;
+
+                if (saveDialog.SelectFilePressed)
+                {
+                    std::string fullPath =
+                        std::string(saveDialog.dirPathText) + "/" +
+                        std::string(saveDialog.fileNameText);
+
+                    try
+                    {
+                        JsonIO::save(dungeon, fullPath);
+                        std::cout << "Dungeon saved to: " << fullPath << std::endl;
+                    }
+                    catch (const std::exception &e)
+                    {
+                        std::cerr << "Save failed: " << e.what() << std::endl;
+                    }
+                }
+            }
+        }
+
         if (showLoadDialog)
         {
-            GuiWindowFileDialog(&fileDialog);
+            GuiWindowFileDialog(&loadDialog);
 
             // When the dialog file closes
-            if (!fileDialog.windowActive)
+            if (!loadDialog.windowActive)
             {
                 showLoadDialog = false;
 
-                if(fileDialog.SelectFilePressed){
-                    std::string fullPath = std::string(fileDialog.dirPathText) + "/" + std::string(fileDialog.fileNameText);
+                if (loadDialog.SelectFilePressed)
+                {
+                    std::string fullPath = std::string(loadDialog.dirPathText) + "/" + std::string(loadDialog.fileNameText);
 
                     try
                     {
                         dungeon = JsonIO::load(fullPath.c_str());
                         tileSize = std::min(WIDTH / dungeon.map.width, HEIGHT / dungeon.map.height);
-                    
+
                         std::cout << "Dungeon loaded from: " << fullPath << std::endl;
                     }
-                    catch(const std::exception& e)
+                    catch (const std::exception &e)
                     {
                         std::cerr << "Load failed: " << e.what() << std::endl;
                     }
-                    
                 }
             }
-            
         }
 
         DrawRectangle(50, 50, 100, 100, RED);
